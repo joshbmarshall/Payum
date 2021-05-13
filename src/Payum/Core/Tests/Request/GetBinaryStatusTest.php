@@ -7,38 +7,34 @@ use PHPUnit\Framework\TestCase;
 
 class GetBinaryStatusTest extends TestCase
 {
-    public static function provideIsXXXMethods()
+    public static function provideIsXXXMethods(): \Iterator
     {
-        return [
-            ['isCaptured'],
-            ['isAuthorized'],
-            ['isPayedout'],
-            ['isRefunded'],
-            ['isCanceled'],
-            ['isPending'],
-            ['isFailed'],
-            ['isNew'],
-            ['isUnknown'],
-            ['isSuspended'],
-            ['isExpired'],
-        ];
+        yield ['isCaptured'];
+        yield ['isAuthorized'];
+        yield ['isPayedout'];
+        yield ['isRefunded'];
+        yield ['isCanceled'];
+        yield ['isPending'];
+        yield ['isFailed'];
+        yield ['isNew'];
+        yield ['isUnknown'];
+        yield ['isSuspended'];
+        yield ['isExpired'];
     }
 
-    public static function provideMarkXXXMethods()
+    public static function provideMarkXXXMethods(): \Iterator
     {
-        return [
-            ['markCaptured'],
-            ['markAuthorized'],
-            ['markPayedout'],
-            ['markRefunded'],
-            ['markCanceled'],
-            ['markPending'],
-            ['markFailed'],
-            ['markNew'],
-            ['markUnknown'],
-            ['markSuspended'],
-            ['markExpired'],
-        ];
+        yield ['markCaptured'];
+        yield ['markAuthorized'];
+        yield ['markPayedout'];
+        yield ['markRefunded'];
+        yield ['markCanceled'];
+        yield ['markPending'];
+        yield ['markFailed'];
+        yield ['markNew'];
+        yield ['markUnknown'];
+        yield ['markSuspended'];
+        yield ['markExpired'];
     }
 
     /**
@@ -84,7 +80,7 @@ class GetBinaryStatusTest extends TestCase
     {
         $getStatus = new GetBinaryStatus(new \stdClass());
 
-        $this->assertInternalType('boolean', $getStatus->$isXXXMethod());
+        $this->assertIsBool($getStatus->$isXXXMethod());
     }
 
     /**

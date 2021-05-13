@@ -1,9 +1,10 @@
 <?php
-namespace Payum\Klarna\Checkout\Tests\Functional\Resources\Views;
+namespace Payum\Stripe\Tests\Functional\Resources\Views;
 
 use Payum\Core\Bridge\Twig\TwigFactory;
+use PHPUnit\Framework\TestCase;
 
-class ObtainTokenTemplateTest extends \PHPUnit\Framework\TestCase
+class ObtainTokenTemplateTest extends TestCase
 {
     /**
      * @test
@@ -16,7 +17,7 @@ class ObtainTokenTemplateTest extends \PHPUnit\Framework\TestCase
             'publishable_key' => 'theKey',
         ));
 
-        $this->assertContains('Stripe.setPublishableKey("theKey");', $result);
+        $this->assertStringContainsString('Stripe.setPublishableKey("theKey");', $result);
     }
 
     /**
@@ -30,8 +31,8 @@ class ObtainTokenTemplateTest extends \PHPUnit\Framework\TestCase
             'publishable_key' => 'theKey',
         ));
 
-        $this->assertContains('data-key="theKey"', $result);
-        $this->assertContains('https://checkout.stripe.com/checkout.js', $result);
+        $this->assertStringContainsString('data-key="theKey"', $result);
+        $this->assertStringContainsString('https://checkout.stripe.com/checkout.js', $result);
     }
 
     /**
@@ -45,7 +46,7 @@ class ObtainTokenTemplateTest extends \PHPUnit\Framework\TestCase
             'model' => array('currency' => 'GBP'),
         ));
 
-        $this->assertContains('data-currency="GBP"', $result);
+        $this->assertStringContainsString('data-currency="GBP"', $result);
     }
 
     /**
@@ -59,6 +60,6 @@ class ObtainTokenTemplateTest extends \PHPUnit\Framework\TestCase
             'model' => array('currency' => ''),
         ));
 
-        $this->assertContains('data-currency="USD"', $result);
+        $this->assertStringContainsString('data-currency="USD"', $result);
     }
 }

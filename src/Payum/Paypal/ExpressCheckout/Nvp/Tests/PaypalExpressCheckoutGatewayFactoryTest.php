@@ -94,7 +94,7 @@ class PaypalExpressCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCas
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -110,7 +110,7 @@ class PaypalExpressCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCas
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -128,7 +128,7 @@ class PaypalExpressCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCas
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
         $this->assertEquals(
@@ -146,7 +146,7 @@ class PaypalExpressCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCas
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('paypal_express_checkout_nvp', $config['payum.factory_name']);
@@ -157,12 +157,11 @@ class PaypalExpressCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCas
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The username, password, signature fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The username, password, signature fields are required.');
         $factory = new PaypalExpressCheckoutGatewayFactory();
 
         $factory->create();
@@ -177,18 +176,18 @@ class PaypalExpressCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCas
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
 
-        $this->assertInternalType('array', $config['payum.paths']);
+        $this->assertIsArray($config['payum.paths']);
         $this->assertNotEmpty($config['payum.paths']);
 
         $this->assertArrayHasKey('PayumCore', $config['payum.paths']);
         $this->assertStringEndsWith('Resources/views', $config['payum.paths']['PayumCore']);
-        $this->assertTrue(file_exists($config['payum.paths']['PayumCore']));
+        $this->assertFileExists($config['payum.paths']['PayumCore']);
 
         $this->assertArrayHasKey('PayumPaypalExpressCheckout', $config['payum.paths']);
         $this->assertStringEndsWith('Resources/views', $config['payum.paths']['PayumPaypalExpressCheckout']);
-        $this->assertTrue(file_exists($config['payum.paths']['PayumPaypalExpressCheckout']));
+        $this->assertFileExists($config['payum.paths']['PayumPaypalExpressCheckout']);
     }
 }

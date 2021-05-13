@@ -1,5 +1,5 @@
 <?php
-namespace Payum\Core\Bridge\Symfony;
+namespace Payum\Core\Tests\Bridge\Symfony;
 
 use Payum\Core\Bridge\Symfony\Reply\HttpResponse as SymfonyHttpResponse;
 use Payum\Core\Bridge\Symfony\ReplyToSymfonyResponseConverter;
@@ -33,7 +33,7 @@ class ReplyToSymfonyResponseConverterTest extends TestCase
         $response = $converter->convert($reply);
 
         $this->assertInstanceOf('Symfony\Component\HttpFoundation\Response', $response);
-        $this->assertContains('Redirecting to /foo/bar', $response->getContent());
+        $this->assertStringContainsString('Redirecting to /foo/bar', $response->getContent());
         $this->assertEquals(302, $response->getStatusCode());
 
         $headers = $response->headers->all();
@@ -113,12 +113,11 @@ class ReplyToSymfonyResponseConverterTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage Cannot convert reply Mock_Base_
      */
     public function shouldChangeReplyToLogicExceptionIfNotSupported()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('Cannot convert reply Mock_Base_');
         $notSupportedReply = $this->createMock('Payum\Core\Reply\Base');
 
         $listener = new ReplyToSymfonyResponseConverter();

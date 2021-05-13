@@ -1,18 +1,22 @@
 <?php
-namespace Payum\Payex\Tests;
+namespace Payum\Be2Bill\Tests;
 
-use Payum\Payex\PayexGatewayFactory;
+use Payum\Be2Bill\Be2BillDirectGatewayFactory;
+use Payum\Core\CoreGatewayFactory;
+use Payum\Core\GatewayFactory;
+use Payum\Core\GatewayFactoryInterface;
+use PHPUnit\Framework\TestCase;
 
-class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
+class Be2BillDirectGatewayFactoryTest extends TestCase
 {
     /**
      * @test
      */
     public function shouldSubClassGatewayFactory()
     {
-        $rc = new \ReflectionClass('Payum\Payex\PayexGatewayFactory');
+        $rc = new \ReflectionClass(Be2BillDirectGatewayFactory::class);
 
-        $this->assertTrue($rc->isSubclassOf('Payum\Core\GatewayFactory'));
+        $this->assertTrue($rc->isSubclassOf(GatewayFactory::class));
     }
 
     /**
@@ -20,7 +24,7 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function couldBeConstructedWithoutAnyArguments()
     {
-        new PayexGatewayFactory();
+        new Be2BillDirectGatewayFactory();
     }
 
     /**
@@ -28,9 +32,9 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldCreateCoreGatewayFactoryIfNotPassed()
     {
-        $factory = new PayexGatewayFactory();
+        $factory = new Be2BillDirectGatewayFactory();
 
-        $this->assertAttributeInstanceOf('Payum\Core\CoreGatewayFactory', 'coreGatewayFactory', $factory);
+        $this->assertAttributeInstanceOf(CoreGatewayFactory::class, 'coreGatewayFactory', $factory);
     }
 
     /**
@@ -38,9 +42,9 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldUseCoreGatewayFactoryPassedAsSecondArgument()
     {
-        $coreGatewayFactory = $this->createMock('Payum\Core\GatewayFactoryInterface');
+        $coreGatewayFactory = $this->createMock(GatewayFactoryInterface::class);
 
-        $factory = new PayexGatewayFactory(array(), $coreGatewayFactory);
+        $factory = new Be2BillDirectGatewayFactory(array(), $coreGatewayFactory);
 
         $this->assertAttributeSame($coreGatewayFactory, 'coreGatewayFactory', $factory);
     }
@@ -50,9 +54,9 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldAllowCreateGateway()
     {
-        $factory = new PayexGatewayFactory();
+        $factory = new Be2BillDirectGatewayFactory();
 
-        $gateway = $factory->create(array('account_number' => 'aNum', 'encryption_key' => 'aKey'));
+        $gateway = $factory->create(array('identifier' => 'anId', 'password' => 'aPass'));
 
         $this->assertInstanceOf('Payum\Core\Gateway', $gateway);
 
@@ -68,13 +72,9 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldAllowCreateGatewayWithCustomApi()
     {
-        $factory = new PayexGatewayFactory();
+        $factory = new Be2BillDirectGatewayFactory();
 
-        $gateway = $factory->create(array(
-            'payum.api.order' => new \stdClass(),
-            'payum.api.agreement' => new \stdClass(),
-            'payum.api.recurring' => new \stdClass()
-        ));
+        $gateway = $factory->create(array('payum.api' => new \stdClass()));
 
         $this->assertInstanceOf('Payum\Core\Gateway', $gateway);
 
@@ -90,11 +90,11 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldAllowCreateGatewayConfig()
     {
-        $factory = new PayexGatewayFactory();
+        $factory = new Be2BillDirectGatewayFactory();
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -103,14 +103,14 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldAddDefaultConfigPassedInConstructorWhileCreatingGatewayConfig()
     {
-        $factory = new PayexGatewayFactory(array(
+        $factory = new Be2BillDirectGatewayFactory(array(
             'foo' => 'fooVal',
             'bar' => 'barVal',
         ));
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -124,14 +124,14 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldConfigContainDefaultOptions()
     {
-        $factory = new PayexGatewayFactory();
+        $factory = new Be2BillDirectGatewayFactory();
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
-        $this->assertEquals(array('account_number' => '', 'encryption_key' => '', 'sandbox' => true), $config['payum.default_options']);
+        $this->assertEquals(array('identifier' => '', 'password' => '', 'sandbox' => true), $config['payum.default_options']);
     }
 
     /**
@@ -139,28 +139,27 @@ class PayexGatewayFactoryTest extends \PHPUnit\Framework\TestCase
      */
     public function shouldConfigContainFactoryNameAndTitle()
     {
-        $factory = new PayexGatewayFactory();
+        $factory = new Be2BillDirectGatewayFactory();
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
-        $this->assertEquals('payex', $config['payum.factory_name']);
+        $this->assertEquals('be2bill_direct', $config['payum.factory_name']);
 
         $this->assertArrayHasKey('payum.factory_title', $config);
-        $this->assertEquals('Payex', $config['payum.factory_title']);
+        $this->assertEquals('Be2Bill Direct', $config['payum.factory_title']);
     }
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The account_number, encryption_key fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
-        $factory = new PayexGatewayFactory();
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The identifier, password fields are required.');
+        $factory = new Be2BillDirectGatewayFactory();
 
         $factory->create();
     }

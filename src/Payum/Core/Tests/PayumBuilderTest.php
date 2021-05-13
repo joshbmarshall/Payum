@@ -39,7 +39,7 @@ use PHPUnit\Framework\TestCase;
 
 class PayumBuilderTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         $_SERVER = [
             'HTTP_HOST' => 'payum.dev',
@@ -57,12 +57,11 @@ class PayumBuilderTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Token storage must be configured.
      */
     public function throwsIfTokenStorageIsNotSet()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Token storage must be configured.');
         $payum = (new PayumBuilder())->getPayum();
 
         $this->assertInstanceOf(Payum::class, $payum);
@@ -82,10 +81,10 @@ class PayumBuilderTest extends TestCase
         $this->assertInstanceOf(HttpRequestVerifier::class, $payum->getHttpRequestVerifier());
         $this->assertInstanceOf(GenericTokenFactory::class, $payum->getTokenFactory());
 
-        $this->assertInternalType('array', $payum->getGateways());
+        $this->assertIsArray($payum->getGateways());
         $this->assertCount(0, $payum->getGateways());
 
-        $this->assertInternalType('array', $payum->getStorages());
+        $this->assertIsArray($payum->getStorages());
         $this->assertCount(3, $payum->getStorages());
         $this->assertArrayHasKey(Payment::class, $payum->getStorages());
         $this->assertArrayHasKey(ArrayObject::class, $payum->getStorages());
@@ -93,7 +92,7 @@ class PayumBuilderTest extends TestCase
 
 
         $factories = $payum->getGatewayFactories();
-        $this->assertInternalType('array', $factories);
+        $this->assertIsArray($factories);
         $this->assertGreaterThan(40, $factories);
 
         $this->assertArrayHasKey('paypal_express_checkout', $factories);
@@ -178,12 +177,11 @@ class PayumBuilderTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Builder returned invalid instance
      */
     public function throwsIfHttpRequestVerifierBuilderReturnsInvalidInstance()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Builder returned invalid instance');
         $payum = (new PayumBuilder())
             ->addDefaultStorages()
             ->setHttpRequestVerifier(function () {
@@ -224,7 +222,7 @@ class PayumBuilderTest extends TestCase
             ->setGenericTokenFactory(function ($tokenFactory, $paths) use ($expectedTokenFactory) {
                 $this->assertInstanceOf(TokenFactoryInterface::class, $tokenFactory);
 
-                $this->assertInternalType('array', $paths);
+                $this->assertIsArray($paths);
                 $this->assertEquals([
                     'capture' => 'capture.php',
                     'notify' => 'notify.php',
@@ -267,12 +265,11 @@ class PayumBuilderTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Builder returned invalid instance
      */
     public function throwsIfGenericTokenFactoryBuilderReturnInvalidInstance()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Builder returned invalid instance');
         $payum = (new PayumBuilder())
             ->addDefaultStorages()
             ->setGenericTokenFactory(function () {
@@ -325,12 +322,11 @@ class PayumBuilderTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Builder returned invalid instance
      */
     public function throwsIfTokenFactoryBuilderReturnInvalidInstance()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Builder returned invalid instance');
         $payum = (new PayumBuilder())
             ->addDefaultStorages()
             ->setTokenFactory(function () {
@@ -376,12 +372,11 @@ class PayumBuilderTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\InvalidArgumentException
-     * @expectedExceptionMessage Gateway config must have factory set in it and it must not be empty.
      */
     public function throwIfTryToAddGatewayConfigWithoutFactoryKeySet()
     {
+        $this->expectException(\Payum\Core\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Gateway config must have factory set in it and it must not be empty.');
         $payum = (new PayumBuilder())
             ->addDefaultStorages()
             ->addGateway('a_gateway', [
@@ -556,7 +551,7 @@ class PayumBuilderTest extends TestCase
         $payum = (new PayumBuilder())
             ->addDefaultStorages()
             ->setCoreGatewayFactory(function ($config) use ($expectedCoreGatewayFactory) {
-                $this->assertInternalType('array', $config);
+                $this->assertIsArray($config);
                 $this->assertNotEmpty($config);
 
                 return $expectedCoreGatewayFactory;
@@ -583,7 +578,7 @@ class PayumBuilderTest extends TestCase
             ->addDefaultStorages()
             ->addStorage(TestModel::class, $expectedStorage)
             ->setCoreGatewayFactory(function ($config) use ($expectedStorage) {
-                $this->assertInternalType('array', $config);
+                $this->assertIsArray($config);
                 $this->assertArrayHasKey('payum.extension.storage_payum_core_tests_testmodel', $config, var_export($config, true));
                 $this->assertInstanceOf(StorageExtension::class, $config['payum.extension.storage_payum_core_tests_testmodel']);
                 $this->assertAttributeSame($expectedStorage, 'storage', $config['payum.extension.storage_payum_core_tests_testmodel']);
@@ -628,12 +623,11 @@ class PayumBuilderTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \LogicException
-     * @expectedExceptionMessage Builder returned invalid instance
      */
     public function throwsIfCoreGatewayFactoryBuilderReturnInvalidInstance()
     {
+        $this->expectException(\LogicException::class);
+        $this->expectExceptionMessage('Builder returned invalid instance');
         $expectedCoreGateway = $this->createMock(GatewayFactoryInterface::class);
 
         $payum = (new PayumBuilder())
@@ -737,7 +731,7 @@ class PayumBuilderTest extends TestCase
             ->addDefaultStorages()
             ->setTokenStorage($tokenStorageMock)
             ->setCoreGatewayFactory(function ($config) use ($tokenStorageMock) {
-                $this->assertInternalType('array', $config);
+                $this->assertIsArray($config);
                 $this->assertArrayHasKey('payum.security.token_storage', $config);
                 $this->assertSame($tokenStorageMock, $config['payum.security.token_storage']);
 

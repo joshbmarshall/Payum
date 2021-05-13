@@ -95,7 +95,7 @@ class PaypalProHostedGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -111,7 +111,7 @@ class PaypalProHostedGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -129,7 +129,7 @@ class PaypalProHostedGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
 
@@ -148,7 +148,7 @@ class PaypalProHostedGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('paypal_pro_hosted', $config['payum.factory_name']);
@@ -159,13 +159,11 @@ class PaypalProHostedGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The username, password, signature
-     * fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The username, password, signature fields are required.');
         $factory = new PaypalProHostedGatewayFactory();
 
         $factory->create();

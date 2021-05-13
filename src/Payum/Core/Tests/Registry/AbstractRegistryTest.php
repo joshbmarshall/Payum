@@ -1,7 +1,7 @@
 <?php
 namespace Payum\Core\Tests\Registry;
 
-use Doctrine\Common\Persistence\Proxy;
+use Doctrine\Persistence\Proxy;
 use PHPUnit\Framework\TestCase;
 
 class AbstractRegistryTest extends TestCase
@@ -127,7 +127,7 @@ class AbstractRegistryTest extends TestCase
 
         $gateways = $registry->getGateways();
 
-        $this->assertInternalType('array', $gateways);
+        $this->assertIsArray($gateways);
         $this->assertCount(2, $gateways);
 
         $this->assertArrayHasKey('fooName', $gateways);
@@ -139,12 +139,11 @@ class AbstractRegistryTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\InvalidArgumentException
-     * @expectedExceptionMessage Gateway "notExistName" does not exist.
      */
     public function throwIfTryToGetGatewayWithNotExistName()
     {
+        $this->expectException(\Payum\Core\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Gateway "notExistName" does not exist.');
         $gateways = array('fooName' => 'fooGateway', 'barName' => 'barGateway');
 
         $registry = $this->createAbstractRegistryMock(array(
@@ -185,7 +184,7 @@ class AbstractRegistryTest extends TestCase
 
         $gateways = $registry->getGatewayFactories();
 
-        $this->assertInternalType('array', $gateways);
+        $this->assertIsArray($gateways);
         $this->assertCount(2, $gateways);
 
         $this->assertArrayHasKey('foo', $gateways);
@@ -197,12 +196,11 @@ class AbstractRegistryTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\InvalidArgumentException
-     * @expectedExceptionMessage Gateway factory "notExistName" does not exist.
      */
     public function throwIfTryToGetGatewayFactoryWithNotExistName()
     {
+        $this->expectException(\Payum\Core\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Gateway factory "notExistName" does not exist.');
         $gatewayFactories = array('foo' => 'fooGatewayFactory', 'bar' => 'barGatewayFactory');
 
         $registry = $this->createAbstractRegistryMock(array(
@@ -264,12 +262,11 @@ class AbstractRegistryTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\InvalidArgumentException
-     * @expectedExceptionMessage A storage for model notRegisteredModelClass was not registered. There are storages for next models: stdClass.
      */
     public function throwIfTryToGetStorageWithNotRegisteredModelClass()
     {
+        $this->expectException(\Payum\Core\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessage('A storage for model notRegisteredModelClass was not registered. There are storages for next models: stdClass.');
         $gateways = array('fooName' => 'fooGateway', 'barName' => 'barGateway');
         $storages = array('stdClass' => 'barStorage');
 
@@ -325,9 +322,8 @@ class AbstractRegistryTest extends TestCase
         $registryMock = $this->getMockForAbstractClass('Payum\Core\Registry\AbstractRegistry', $constructorArguments);
 
         $registryMock
-            ->expects($this->any())
             ->method('getService')
-            ->will($this->returnArgument(0))
+            ->willReturnArgument(0)
         ;
 
         return $registryMock;
@@ -348,3 +344,4 @@ class DoctrineProxy extends DoctrineModel implements Proxy
     {
     }
 }
+

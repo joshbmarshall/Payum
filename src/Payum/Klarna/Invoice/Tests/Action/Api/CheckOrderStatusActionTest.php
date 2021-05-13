@@ -1,16 +1,14 @@
 <?php
 namespace Payum\Klarna\Invoice\Tests\Action\Api;
 
-use Payum\Core\Tests\SkipOnPhp7Trait;
 use Payum\Klarna\Invoice\Action\Api\CheckOrderStatusAction;
 use Payum\Klarna\Invoice\Config;
 use Payum\Klarna\Invoice\Request\Api\CheckOrderStatus;
 use PHPUnit\Framework\TestCase;
+use PhpXmlRpc\Client;
 
 class CheckOrderStatusActionTest extends TestCase
 {
-    use SkipOnPhp7Trait;
-
     /**
      * @test
      */
@@ -51,12 +49,11 @@ class CheckOrderStatusActionTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\UnsupportedApiException
-     * @expectedExceptionMessage Not supported api given. It must be an instance of Payum\Klarna\Invoice\Config
      */
     public function throwApiNotSupportedIfNotConfigGivenAsApi()
     {
+        $this->expectException(\Payum\Core\Exception\UnsupportedApiException::class);
+        $this->expectExceptionMessage('Not supported api given. It must be an instance of Payum\Klarna\Invoice\Config');
         $action = new CheckOrderStatusAction($this->createKlarnaMock());
 
         $action->setApi(new \stdClass());
@@ -94,11 +91,10 @@ class CheckOrderStatusActionTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\RequestNotSupportedException
      */
     public function throwIfNotSupportedRequestGivenAsArgumentOnExecute()
     {
+        $this->expectException(\Payum\Core\Exception\RequestNotSupportedException::class);
         $action = new CheckOrderStatusAction();
 
         $action->execute(new \stdClass());
@@ -106,12 +102,11 @@ class CheckOrderStatusActionTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The rno fields are required.
      */
     public function throwIfRnoNotSet()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The rno fields are required.');
         $action = new CheckOrderStatusAction();
 
         $action->execute(new CheckOrderStatus(array()));
@@ -201,7 +196,7 @@ class CheckOrderStatusActionTest extends TestCase
 
         $rp = new \ReflectionProperty($klarnaMock, 'xmlrpc');
         $rp->setAccessible(true);
-        $rp->setValue($klarnaMock, $this->createMock('xmlrpc_client', array(), array(), '', false));
+        $rp->setValue($klarnaMock, $this->createMock(class_exists('xmlrpc_client') ? 'xmlrpc_client' : Client::class));
         $rp->setAccessible(false);
 
         return $klarnaMock;

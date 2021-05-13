@@ -34,11 +34,35 @@ use Payum\Core\Payum;
 /** @var Payum $payum */
 $payum = (new PayumBuilder())
     ->addDefaultStorages()
-    ->addGateway('gatewayName', [
+    ->addGateway('paypalRest', [
+        'factory' => 'paypal_rest',
+        'client_id' => 'REPLACE IT', // Your PayPal REST API cliend ID.
+        'client_secret' => 'REPLACE IT', // Your PayPal REST API client secret.
+        'config_path' => 'REPLACE IT', // Point to the directory where your skd_config.ini is located.
+    ])
+
+    ->getPayum()
+;
+```
+alternatively, set configuration via the `config` option. See PayPal's `sdk_config.ini` for available options.
+```php
+<?php
+//config.php
+
+use Payum\Core\PayumBuilder;
+use Payum\Core\Payum;
+
+/** @var Payum $payum */
+$payum = (new PayumBuilder())
+    ->addDefaultStorages()
+    ->addGateway('paypalRest', [
         'factory' => 'paypal_rest',
         'client_id' => 'REPLACE IT',
         'client_secret' => 'REPLACE IT',
-        'config_path' => 'REPLACE IT',
+        'config' => [
+            'option1' => 'value1',
+            'option2' => 'value2',
+        ],
     ])
 
     ->getPayum()
@@ -53,6 +77,42 @@ $payum = (new PayumBuilder())
 
 include __DIR__.'/config.php';
 
+use Payum\Core\Model\Payment;
+
+$paymentClass = Payment::class;
+
+/** @var \Payum\Core\Payum $payum */
+$storage = $payum->getStorage($paymentClass);
+
+/** @var Payment $payment */
+$payment = $storage->create();
+$payment->setNumber(uniqid());
+$payment->setTotalAmount(200);
+$payment->setCurrencyCode('EUR');
+
+
+$payment->setDetails(array(
+  // put here any fields in a gateway format.
+));
+
+$storage->update($payment);
+
+$captureToken = $payum->getTokenFactory()->createCaptureToken('paypalRest', $payment, 'done.php');
+
+header('Location: '.$captureToken->getTargetUrl());
+
+```
+
+or if you want to have more control over the payment information sent to PayPal:
+
+```php
+<?php
+// prepare.php
+
+include __DIR__.'/config.php';
+
+use League\Uri\Http as HttpUri;
+use League\Uri\UriModifier;
 use PayPal\Api\Amount;
 use PayPal\Api\Payer;
 use PayPal\Api\RedirectUrls;
@@ -77,11 +137,11 @@ $transaction = new Transaction();
 $transaction->amount = $amount;
 $transaction->description = "This is the payment description.";
 
-$captureToken = $payum->getTokenFactory()->createCaptureToken('paypalRest', $payment, 'create_recurring_payment.php');
+$captureToken = $payum->getTokenFactory()->createCaptureToken('paypalRest', $payment, 'done.php');
 
 $redirectUrls = new RedirectUrls();
 $redirectUrls->return_url = $captureToken->getTargetUrl();
-$redirectUrls->cancel_url = $captureToken->getTargetUrl();
+$redirectUrls->cancel_url = (string) UriModifier::mergeQuery(HttpUri::createFromString($captureToken->getTargetUrl()), 'cancelled=1');
 
 $payment->intent = "sale";
 $payment->payer = $payer;
@@ -95,6 +155,5 @@ header("Location: ".$captureToken->getTargetUrl());
 
 That's it. As you see we configured Paypal Rest `config.php` and set details `prepare.php`.
 [capture.php](../../examples/capture-script.md) and [done.php](../../examples/done-script.md) scripts remain same.
-Here you have to modify a `gatewayName` value. Set it to `paypal_pro_checkout`. The rest remain the same as described in basic [get it started](../../get-it-started.md) documentation.
 
 Back to [index](../../index.md).

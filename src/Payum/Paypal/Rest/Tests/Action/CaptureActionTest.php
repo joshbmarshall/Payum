@@ -5,7 +5,6 @@ namespace Payum\Paypal\Rest\Tests\Action;
 use PayPal\Api\Payment as PaypalPayment;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
-use Payum\Core\Exception\UnsupportedApiException;
 use Payum\Paypal\Rest\Action\CaptureAction;
 use Payum\Paypal\Rest\Model\PaymentDetails;
 use Payum\Core\Request\Capture;
@@ -37,6 +36,20 @@ class CaptureActionTest extends \PHPUnit\Framework\TestCase
     /**
      * @test
      */
+    public function shouldSupportCaptureWithArrayObjectModel()
+    {
+        $action = new CaptureAction();
+
+        $model = new \ArrayObject();
+
+        $request = new Capture($model);
+
+        $this->assertTrue($action->supports($request));
+    }
+
+    /**
+     * @test
+     */
     public function shouldNotSupportCapturePaymentSdkModel()
     {
         $action = new CaptureAction();
@@ -48,11 +61,10 @@ class CaptureActionTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\RequestNotSupportedException
      */
     public function throwIfNotSupportedRequestGivenAsArgumentForExecute()
     {
+        $this->expectException(\Payum\Core\Exception\RequestNotSupportedException::class);
         $action = new CaptureAction();
 
         $action->execute(new \stdClass());
@@ -78,6 +90,7 @@ class CaptureActionTest extends \PHPUnit\Framework\TestCase
         $request = new Capture($this->createMock(PaypalPayment::class));
 
         $this->assertTrue($action->supports($request));
+        $this->assertTrue($action->supports(new Capture(new \ArrayObject)));
     }
 
     /**
@@ -97,11 +110,10 @@ class CaptureActionTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\UnsupportedApiException
      */
     public function throwIfNotSupportedApiContext()
     {
+        $this->expectException(\Payum\Core\Exception\UnsupportedApiException::class);
         $action = new CaptureAction();
 
         $action->setApi(new \stdClass());

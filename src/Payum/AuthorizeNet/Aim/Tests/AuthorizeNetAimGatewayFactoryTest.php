@@ -2,13 +2,10 @@
 namespace Payum\AuthorizeNet\Aim\Tests;
 
 use Payum\AuthorizeNet\Aim\AuthorizeNetAimGatewayFactory;
-use Payum\Core\Tests\SkipOnPhp7Trait;
 use PHPUnit\Framework\TestCase;
 
 class AuthorizeNetAimGatewayFactoryTest extends TestCase
 {
-    use SkipOnPhp7Trait;
-
     /**
      * @test
      */
@@ -94,7 +91,7 @@ class AuthorizeNetAimGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -110,7 +107,7 @@ class AuthorizeNetAimGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -128,7 +125,7 @@ class AuthorizeNetAimGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
         $this->assertEquals(array('login_id' => '', 'transaction_key' => '', 'sandbox' => true), $config['payum.default_options']);
@@ -143,7 +140,7 @@ class AuthorizeNetAimGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('authorize_net_aim', $config['payum.factory_name']);
@@ -154,12 +151,11 @@ class AuthorizeNetAimGatewayFactoryTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The login_id, transaction_key fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The login_id, transaction_key fields are required.');
         $factory = new AuthorizeNetAimGatewayFactory();
 
         $factory->create();

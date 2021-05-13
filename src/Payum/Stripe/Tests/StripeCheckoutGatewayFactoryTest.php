@@ -90,7 +90,7 @@ class StripeCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -106,7 +106,7 @@ class StripeCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -124,7 +124,7 @@ class StripeCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
         $this->assertEquals(array('publishable_key' => '', 'secret_key' => ''), $config['payum.default_options']);
@@ -139,7 +139,7 @@ class StripeCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('stripe_checkout', $config['payum.factory_name']);
@@ -150,12 +150,11 @@ class StripeCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The publishable_key, secret_key fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The publishable_key, secret_key fields are required.');
         $factory = new StripeCheckoutGatewayFactory();
 
         $factory->create();
@@ -170,18 +169,18 @@ class StripeCheckoutGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
 
-        $this->assertInternalType('array', $config['payum.paths']);
+        $this->assertIsArray($config['payum.paths']);
         $this->assertNotEmpty($config['payum.paths']);
 
         $this->assertArrayHasKey('PayumCore', $config['payum.paths']);
         $this->assertStringEndsWith('Resources/views', $config['payum.paths']['PayumCore']);
-        $this->assertTrue(file_exists($config['payum.paths']['PayumCore']));
+        $this->assertFileExists($config['payum.paths']['PayumCore']);
 
         $this->assertArrayHasKey('PayumStripe', $config['payum.paths']);
         $this->assertStringEndsWith('Resources/views', $config['payum.paths']['PayumStripe']);
-        $this->assertTrue(file_exists($config['payum.paths']['PayumStripe']));
+        $this->assertFileExists($config['payum.paths']['PayumStripe']);
     }
 }

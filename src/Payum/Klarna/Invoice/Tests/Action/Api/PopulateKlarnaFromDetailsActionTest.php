@@ -1,15 +1,12 @@
 <?php
 namespace Payum\Klarna\Invoice\Tests\Action\Api;
 
-use Payum\Core\Tests\SkipOnPhp7Trait;
 use Payum\Klarna\Invoice\Action\Api\PopulateKlarnaFromDetailsAction;
 use Payum\Klarna\Invoice\Request\Api\PopulateKlarnaFromDetails;
 use PHPUnit\Framework\TestCase;
 
 class PopulateKlarnaFromDetailsActionTest extends TestCase
 {
-    use SkipOnPhp7Trait;
-
     /**
      * @test
      */
@@ -50,11 +47,10 @@ class PopulateKlarnaFromDetailsActionTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\RequestNotSupportedException
      */
     public function throwIfNotSupportedRequestGivenAsArgumentOnExecute()
     {
+        $this->expectException(\Payum\Core\Exception\RequestNotSupportedException::class);
         $action = new PopulateKlarnaFromDetailsAction();
 
         $action->execute(new \stdClass());

@@ -1,6 +1,7 @@
 <?php
 namespace Payum\Core;
 
+use Http\Adapter\Guzzle7\Client as HttpGuzzle7Client;
 use Http\Adapter\Guzzle6\Client as HttpGuzzle6Client;
 use Http\Adapter\Guzzle5\Client as HttpGuzzle5Client;
 use Http\Adapter\Buzz\Client as HttpBuzzClient;
@@ -13,19 +14,22 @@ use Http\Message\MessageFactory\DiactorosMessageFactory;
 use Http\Message\MessageFactory\GuzzleMessageFactory;
 use Http\Message\StreamFactory\DiactorosStreamFactory;
 use Http\Message\StreamFactory\GuzzleStreamFactory;
+use Nyholm\Psr7\Factory\HttplugFactory;
 use Payum\Core\Action\AuthorizePaymentAction;
 use Payum\Core\Action\CapturePaymentAction;
 use Payum\Core\Action\ExecuteSameRequestWithModelDetailsAction;
 use Payum\Core\Action\GetCurrencyAction;
 use Payum\Core\Action\GetTokenAction;
 use Payum\Core\Action\PayoutPayoutAction;
-use Payum\Core\Bridge\Guzzle\HttpClientFactory;
 use Payum\Core\Bridge\Httplug\HttplugClient;
 use Payum\Core\Bridge\PlainPhp\Action\GetHttpRequestAction;
 use Payum\Core\Bridge\Spl\ArrayObject;
 use Payum\Core\Bridge\Twig\Action\RenderTemplateAction;
 use Payum\Core\Bridge\Twig\TwigUtil;
 use Payum\Core\Extension\EndlessCycleDetectorExtension;
+use Symfony\Component\HttpClient\HttplugClient as SymfonyHttplugClient;
+use Twig\Environment;
+use Twig\Loader\ChainLoader;
 
 class CoreGatewayFactory implements GatewayFactoryInterface
 {
@@ -79,8 +83,12 @@ class CoreGatewayFactory implements GatewayFactoryInterface
                     return new GuzzleMessageFactory();
                 }
 
-                if (class_exists(\Zend\Diactoros\Request::class)) {
+                if (class_exists(\Laminas\Diactoros\Request::class) || class_exists(\Zend\Diactoros\Request::class)) {
                     return new DiactorosMessageFactory();
+                }
+
+                if (class_exists(\Nyholm\Psr7\Request::class)) {
+                    return new HttplugFactory();
                 }
 
                 throw new \LogicException('The httplug.message_factory could not be guessed. Install one of the following packages: php-http/guzzle6-adapter, zendframework/zend-diactoros. You can also overwrite the config option with your implementation.');
@@ -98,11 +106,19 @@ class CoreGatewayFactory implements GatewayFactoryInterface
                     return new DiactorosStreamFactory();
                 }
 
+                if (class_exists(\Nyholm\Psr7\Request::class)) {
+                    return new HttplugFactory();
+                }
+
                 throw new \LogicException('The httplug.stream_factory could not be guessed. Install one of the following packages: php-http/guzzle6-adapter, zendframework/zend-diactoros. You can also overwrite the config option with your implementation.');
             },
             'httplug.client'=>function (ArrayObject $config) {
                 if (class_exists(HttpClientDiscovery::class)) {
                     return HttpClientDiscovery::find();
+                }
+
+                if (class_exists(HttpGuzzle7Client::class)) {
+                    return new HttpGuzzle7Client();
                 }
 
                 if (class_exists(HttpGuzzle6Client::class)) {
@@ -111,6 +127,10 @@ class CoreGatewayFactory implements GatewayFactoryInterface
 
                 if (class_exists(HttpGuzzle5Client::class)) {
                     return new HttpGuzzle5Client();
+                }
+
+                if (class_exists(SymfonyHttplugClient::class)) {
+                    return new SymfonyHttplugClient();
                 }
 
                 if (class_exists(HttpSocketClient::class)) {
@@ -125,7 +145,7 @@ class CoreGatewayFactory implements GatewayFactoryInterface
                     return new HttpBuzzClient();
                 }
 
-                throw new \LogicException('The httplug.client could not be guessed. Install one of the following packages: php-http/guzzle6-adapter. You can also overwrite the config option with your implementation.');
+                throw new \LogicException('The httplug.client could not be guessed. Install one of the following packages: php-http/guzzle7-adapter, php-http/guzzle6-adapter. You can also overwrite the config option with your implementation.');
             },
             'payum.http_client'=>function (ArrayObject $config) {
                 return new HttplugClient($config['httplug.client']);
@@ -133,13 +153,13 @@ class CoreGatewayFactory implements GatewayFactoryInterface
             'payum.template.layout' => '@PayumCore/layout.html.twig',
 
             'twig.env' => function () {
-                return new \Twig_Environment(new \Twig_Loader_Chain());
+                return new Environment(new ChainLoader());
             },
             'twig.register_paths' => function (ArrayObject $config) {
                 $twig = $config['twig.env'];
-                if (false == $twig instanceof \Twig_Environment) {
+                if (false == $twig instanceof Environment) {
                     throw new \LogicException(sprintf(
-                        'The `twig.env config option must contains instance of Twig_Environment but got %s`',
+                        'The `twig.env config option must contains instance of Twig\Environment but got %s`',
                         is_object($twig) ? get_class($twig) : gettype($twig)
                     ));
                 }
@@ -200,7 +220,7 @@ class CoreGatewayFactory implements GatewayFactoryInterface
         }
 
         foreach ($config as $name => $value) {
-            if (is_callable($value)) {
+            if (is_callable($value) && !(is_string($value) && function_exists('\\'.$value))) {
                 $config[$name] = call_user_func($value, $config);
             }
         }

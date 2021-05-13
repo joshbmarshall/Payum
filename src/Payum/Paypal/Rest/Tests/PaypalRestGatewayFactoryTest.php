@@ -75,6 +75,44 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
     /**
      * @test
      */
+    public function shouldAllowCreateGatewayWithCustomConfig()
+    {
+        $factory = new PaypalRestGatewayFactory();
+
+        $givenConfig = [
+            'log.LogLevel' => 'DEBUG',
+            'mode' => 'live',
+            'log.FileName' => '/foo/bar.log',
+            'http.ConnectionTimeOut' => '10',
+        ];
+
+        $gateway = $factory->create([
+            'client_id' => 'cId',
+            'client_secret' => 'cSecret',
+            'config' => $givenConfig,
+        ]);
+
+        $apis = $this->readAttribute($gateway, 'apis');
+        $apiContext = null;
+        foreach ($apis as $api) {
+            if ($api instanceof \PayPal\Rest\ApiContext) {
+                $apiContext = $api;
+                break;
+            }
+        }
+
+        $this->assertNotNull($apiContext);
+
+        $apiContextConfig = $apiContext->getConfig();
+        foreach ($givenConfig as $k => $v) {
+            $this->assertArrayHasKey($k, $apiContextConfig);
+            $this->assertSame($v, $apiContextConfig[$k]);
+        }
+    }
+
+    /**
+     * @test
+     */
     public function shouldAllowCreateGatewayWithCustomApi()
     {
         $factory = new PaypalRestGatewayFactory();
@@ -99,7 +137,7 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -115,7 +153,7 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -133,10 +171,10 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
-        $this->assertEquals(['client_id' => '', 'client_secret' => '', 'config_path' => ''], $config['payum.default_options']);
+        $this->assertEquals(['client_id' => '', 'client_secret' => '', 'config_path' => '', 'config' => []], $config['payum.default_options']);
     }
 
     /**
@@ -148,7 +186,7 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('paypal_rest', $config['payum.factory_name']);
@@ -159,12 +197,11 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The client_id, client_secret, config_path fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The client_id, client_secret fields are required.');
         $factory = new PaypalRestGatewayFactory();
 
         $factory->create();
@@ -172,12 +209,11 @@ class PaypalRestGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\InvalidArgumentException
-     * @expectedExceptionMessageRegExp /Given \"config_path\" is invalid. \w+/
      */
     public function shouldThrowIfConfigPathOptionsNotEqualPaypalPath()
     {
+        $this->expectException(\Payum\Core\Exception\InvalidArgumentException::class);
+        $this->expectExceptionMessageRegExp('/Given \"config_path\" is invalid. \w+/');
         $factory = new PaypalRestGatewayFactory();
         $factory->create([
             'client_id' => 'cId',

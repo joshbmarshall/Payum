@@ -28,23 +28,21 @@ class ApiTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The identifier, password fields are required.
      */
     public function throwIfRequiredOptionsNotSetInConstructor()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The identifier, password fields are required.');
         new Api(array(), $this->createHttpClientMock(), $this->createHttpMessageFactory());
     }
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The boolean sandbox option must be set.
      */
     public function throwIfSandboxOptionsNotBooleanInConstructor()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The boolean sandbox option must be set.');
         new Api(array(
             'identifier' => 'anId',
             'password' => 'aPass',
@@ -67,7 +65,7 @@ class ApiTest extends TestCase
             'AMOUNT' => 100,
         ));
 
-        $this->assertInternalType('array', $post);
+        $this->assertIsArray($post);
         $this->assertArrayHasKey('OPERATIONTYPE', $post);
         $this->assertEquals(Api::OPERATION_PAYMENT, $post['OPERATIONTYPE']);
     }
@@ -87,7 +85,7 @@ class ApiTest extends TestCase
             'AMOUNT' => 100,
         ));
 
-        $this->assertInternalType('array', $post);
+        $this->assertIsArray($post);
         $this->assertArrayHasKey('VERSION', $post);
         $this->assertArrayHasKey('IDENTIFIER', $post);
         $this->assertArrayHasKey('HASH', $post);
@@ -110,7 +108,7 @@ class ApiTest extends TestCase
             'BAR' => 'barVal',
         ));
 
-        $this->assertInternalType('array', $post);
+        $this->assertIsArray($post);
         $this->assertArrayNotHasKey('FOO', $post);
         $this->assertArrayNotHasKey('BAR', $post);
     }
@@ -131,7 +129,7 @@ class ApiTest extends TestCase
             'DESCRIPTION' => 'a desc',
         ));
 
-        $this->assertInternalType('array', $post);
+        $this->assertIsArray($post);
 
         $this->assertArrayHasKey('AMOUNT', $post);
         $this->assertEquals(100, $post['AMOUNT']);

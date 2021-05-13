@@ -95,7 +95,7 @@ class KlarnaCheckoutGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -111,7 +111,7 @@ class KlarnaCheckoutGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -129,7 +129,7 @@ class KlarnaCheckoutGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
         $this->assertEquals(
@@ -153,7 +153,7 @@ class KlarnaCheckoutGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('klarna_checkout', $config['payum.factory_name']);
@@ -164,12 +164,11 @@ class KlarnaCheckoutGatewayFactoryTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The merchant_id, secret fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The merchant_id, secret fields are required.');
         $factory = new KlarnaCheckoutGatewayFactory();
 
         $factory->create();
@@ -184,18 +183,18 @@ class KlarnaCheckoutGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
 
-        $this->assertInternalType('array', $config['payum.paths']);
+        $this->assertIsArray($config['payum.paths']);
         $this->assertNotEmpty($config['payum.paths']);
 
         $this->assertArrayHasKey('PayumCore', $config['payum.paths']);
         $this->assertStringEndsWith('Resources/views', $config['payum.paths']['PayumCore']);
-        $this->assertTrue(file_exists($config['payum.paths']['PayumCore']));
+        $this->assertFileExists($config['payum.paths']['PayumCore']);
 
         $this->assertArrayHasKey('PayumKlarnaCheckout', $config['payum.paths']);
         $this->assertStringEndsWith('Resources/views', $config['payum.paths']['PayumKlarnaCheckout']);
-        $this->assertTrue(file_exists($config['payum.paths']['PayumKlarnaCheckout']));
+        $this->assertFileExists($config['payum.paths']['PayumKlarnaCheckout']);
     }
 }

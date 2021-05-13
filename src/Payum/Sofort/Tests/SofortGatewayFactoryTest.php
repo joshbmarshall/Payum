@@ -96,7 +96,7 @@ class SofortGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -112,7 +112,7 @@ class SofortGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -130,7 +130,7 @@ class SofortGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
         $this->assertEquals(
@@ -148,7 +148,7 @@ class SofortGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('sofort', $config['payum.factory_name']);
@@ -159,12 +159,11 @@ class SofortGatewayFactoryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The config_key fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The config_key fields are required.');
         $factory = new SofortGatewayFactory();
 
         $factory->create();

@@ -97,7 +97,7 @@ class KlarnaInvoiceGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
         $this->assertNotEmpty($config);
     }
 
@@ -113,7 +113,7 @@ class KlarnaInvoiceGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('foo', $config);
         $this->assertEquals('fooVal', $config['foo']);
@@ -131,7 +131,7 @@ class KlarnaInvoiceGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.default_options', $config);
         $this->assertEquals(
@@ -149,7 +149,7 @@ class KlarnaInvoiceGatewayFactoryTest extends TestCase
 
         $config = $factory->createConfig();
 
-        $this->assertInternalType('array', $config);
+        $this->assertIsArray($config);
 
         $this->assertArrayHasKey('payum.factory_name', $config);
         $this->assertEquals('klarna_invoice', $config['payum.factory_name']);
@@ -160,12 +160,11 @@ class KlarnaInvoiceGatewayFactoryTest extends TestCase
 
     /**
      * @test
-     *
-     * @expectedException \Payum\Core\Exception\LogicException
-     * @expectedExceptionMessage The eid, secret, country, language, currency fields are required.
      */
     public function shouldThrowIfRequiredOptionsNotPassed()
     {
+        $this->expectException(\Payum\Core\Exception\LogicException::class);
+        $this->expectExceptionMessage('The eid, secret, country, language, currency fields are required.');
         $factory = new KlarnaInvoiceGatewayFactory();
 
         $factory->create();
